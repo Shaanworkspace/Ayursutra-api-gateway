@@ -18,6 +18,8 @@ public class KeyClockUserSyncFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
+        String userId = exchange.getRequest().getHeaders().getFirst("X-User-ID");
+        String token = exchange.getRequest().getHeaders().getFirst("Authorization");
         // Request details निकालना
         var request = exchange.getRequest();
         var method = request.getMethod();
