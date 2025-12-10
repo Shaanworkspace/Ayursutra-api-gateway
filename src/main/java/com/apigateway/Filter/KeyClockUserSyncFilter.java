@@ -24,7 +24,7 @@ public class KeyClockUserSyncFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-        if(token==null || !token.startsWith("Barer ")){
+        if(token==null || !token.startsWith("Bearer ")){
             return chain.filter(exchange);
         }
 
