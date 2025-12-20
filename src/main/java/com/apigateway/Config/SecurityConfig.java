@@ -20,7 +20,7 @@ public class SecurityConfig {
 				.cors(Customizer.withDefaults())
 				.authorizeExchange(exchange->exchange
 						.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.pathMatchers("/user/register","/user/login").permitAll()
+						.pathMatchers("/api/**","/**").permitAll()
 						.anyExchange().authenticated());
 		return http.build();
 	}
