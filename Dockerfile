@@ -1,10 +1,11 @@
-FROM maven:3.9.9-eclipse-temurin-17 AS builder
-LABEL authors="shaan"
+# Build stage
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 COPY . .
 RUN mvn -B clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk-alpine
+# Runtime stage
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8085
