@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
-public class CorsResponseFilter implements GlobalFilter, Ordered {
+public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
 
 	private static final String[] CORS_HEADERS = {
 			HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -27,7 +27,6 @@ public class CorsResponseFilter implements GlobalFilter, Ordered {
 		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
 			HttpHeaders headers = exchange.getResponse().getHeaders();
 
-			// Deduplicate CORS headers - keep only first value
 			for (String headerName : CORS_HEADERS) {
 				List<String> values = headers.get(headerName);
 				if (values != null && values.size() > 1) {
