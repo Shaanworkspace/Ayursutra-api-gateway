@@ -8,10 +8,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
+
+	private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
+			"https://ayursutra-frontend.netlify.app",
+			"http://localhost:5173",
+			"http://localhost:3000"
+	);
 
 	private static final String[] CORS_HEADERS = {
 			HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -26,12 +33,26 @@ public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
 			HttpHeaders headers = exchange.getResponse().getHeaders();
+			String origin = exchange.getRequest().getHeaders().getOrigin();
 
+			// Deduplicate CORS headers
 			for (String headerName : CORS_HEADERS) {
 				List<String> values = headers.get(headerName);
 				if (values != null && values.size() > 1) {
-					String firstValue = values.getFirst();
+					String firstValue = values.get(0);
 					headers.set(headerName, firstValue);
+				}
+			}
+
+			// Ensure CORS headers are present
+			if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+				if (!headers.containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)) {
+					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
+							"GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD");
+					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+							"Authorization, Content-Type, X-Requested-With, Accept, Origin");
 				}
 			}
 		}));
