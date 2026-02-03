@@ -1,5 +1,6 @@
 package com.apigateway.filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
 
 	private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
@@ -31,6 +33,11 @@ public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		log.info("GATEWAY RECEIVING: {} {}", exchange.getRequest().getMethod(), exchange.getRequest().getURI());
+
+		String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+		log.info("GATEWAY AUTH HEADER: {}", authHeader != null ? "PRESENT (Starts with " + authHeader.substring(0, 15) + "...)" : "MISSING");
+
 		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
 			HttpHeaders headers = exchange.getResponse().getHeaders();
 			String origin = exchange.getRequest().getHeaders().getOrigin();
@@ -52,9 +59,11 @@ public class DeduplicateCorsHeadersFilter implements GlobalFilter, Ordered {
 					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
 							"GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD");
 					headers.set(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
-							"Authorization, Content-Type, X-Requested-With, Accept, Origin");
+							"Authorization, Content-Type, X-Requested-With, Accept, Origin, X-Gateway-Request, Cache-Control");
 				}
 			}
+
+			log.info("GATEWAY SENDING RESPONSE: {} , with Header: {}", exchange.getResponse().getStatusCode(),headers);
 		}));
 	}
 
