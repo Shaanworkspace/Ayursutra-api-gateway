@@ -1,8 +1,11 @@
+FROM eclipse-temurin:21-jre-jammy
 
-FROM openjdk:21-jdk-slim
 WORKDIR /app
-# JAR copy karein (Actions build karega)
+
 COPY target/*.jar app.jar
-# 1GB RAM ke liye memory limits zaruri hain
-ENTRYPOINT ["java", "-Xms256m", "-Xmx512m", "-jar", "app.jar"]
+
+ENV JAVA_OPTS="-Xms256m -Xmx512m"
+
 EXPOSE 8085
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
