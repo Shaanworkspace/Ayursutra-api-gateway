@@ -3,7 +3,7 @@ name: Deploy API Gateway to OCI
 on:
   push:
     branches:
-      - main  # Ya aapka jo bhi primary branch ho
+      - main
 
 jobs:
   build-and-deploy:
@@ -47,4 +47,5 @@ jobs:
               --name api-gateway \
               -p 8085:8085 \
               --restart always \
+              -e SPRING_PROFILES_ACTIVE=docker \
               ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest
