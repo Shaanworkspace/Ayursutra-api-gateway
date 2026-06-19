@@ -48,4 +48,7 @@ jobs:
               -p 8085:8085 \
               --restart always \
               -e SPRING_PROFILES_ACTIVE=docker \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_REGION=${{ secrets.AWS_REGION || 'ap-south-1' }} \
               ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest
